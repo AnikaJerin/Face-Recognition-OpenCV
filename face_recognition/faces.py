@@ -4,7 +4,7 @@ import face_recognition
 # The library face_recognition is based on deep learning, it supports single-shot learning which means it needs a single picture to train itself to detect a person.
 import os
 import numpy as np
-from datetime import datetime
+import datetime
 from flask import Flask, render_template, Response
 import cv2
 from flask_socketio import SocketIO
@@ -16,8 +16,8 @@ socketio = SocketIO(app)
 def index():
     return render_template('face_recognition.html')
 
-def broadcast_name(name,image_url):
-    socketio.emit('update_name', {'name': name,'image_url': image_url})
+def broadcast_name(name,image_url,rec_date,rec_time):
+    socketio.emit('update_name', {'name': name,'image_url': image_url,'rec_date':rec_date,'rec_time':rec_time})
 
 def generate_frames():
     path = 'Training_images'
@@ -77,7 +77,9 @@ def generate_frames():
                 cv2.rectangle(img, (x1,y2-35),(x2,y2), (0,255,0), cv2.FILLED)
                 cv2.putText(img,name, (x1+6,y2-5), cv2.FONT_HERSHEY_TRIPLEX  ,1,(255,255,255),2)
                 # cv2.putText(img,'abc', (x1+6,y2+15), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
-                broadcast_name(name.capitalize(),f'/static/img/{name.capitalize()}.jpg')
+                rec_date = datetime.date.today()
+                rec_time = datetime.datetime.now()
+                broadcast_name(name.capitalize(),f'/static/img/{name.capitalize()}.jpg',rec_date.strftime('%d-%m-%Y'),rec_time.strftime('%H:%M:%S'))
                 markAttendance(name)
             else:
                 name = 'Unknown'
