@@ -1,0 +1,26 @@
+#monitor_screen .scan
+{
+  width:96.6%;
+  height:5px;
+  background-color:green;
+  position:absolute;
+  z-index:9999;
+   -moz-animation: scan 5s infinite;
+  -webkit-animation: scan 5s infinite;
+  animation: scan 5s infinite;
+   -webkit-animation-direction: alternate-reverse;
+  box-shadow:0px 0px 30px rgba(255,204,102,.5);
+
+
+}
+
+@-webkit-keyframes scan {
+  0%, 100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    -webkit-transform: translateY(210px);
+    transform: translateY(70vh);
+  }
+}

@@ -1,94 +1,132 @@
-# import cv2
-# import numpy as np
-# cap = cv2.VideoCapture(0)
-# while True:
-#     ret, frame = cap.read()
-#     cv2.imshow('frame', frame)
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         break
-#
-# cap.release()
-# cv2.destroyAllWindows()
-
 import datetime
-
-import numpy as np
-import cv2
 import pickle
 import face_recognition
 # The library face_recognition is based on deep learning, it supports single-shot learning which means it needs a single picture to train itself to detect a person.
 import os
 import numpy as np
 from datetime import datetime
+from flask import Flask, render_template, Response
+import cv2
+from flask_socketio import SocketIO
 
-path = 'Training_images'
+app = Flask(__name__)
+socketio = SocketIO(app)
 
-images = []
-classNames = []
-mylist = os.listdir(path)
-for cl in mylist:
-    curImg = cv2.imread(f'{path}/{cl}')
-    images.append(curImg)
-    classNames.append(os.path.splitext(cl)[0])
+@app.route('/')
+def index():
+    return render_template('face_recognition.html')
 
-def findEncodings(images):
-    encodeList = []
-    for img in images:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        encoded_face = face_recognition.face_encodings(img)[0]
-        encodeList.append(encoded_face)
-    return encodeList
-encoded_face_train = findEncodings(images)
+def broadcast_name(name,image_url):
+    socketio.emit('update_name', {'name': name,'image_url': image_url})
 
-def markAttendance(name):
-    with open('Attendance.csv','r+') as f:
-        myDataList = f.readlines()
-        nameList = []
-        for line in myDataList:
-            entry = line.split(',')
-            nameList.append(entry[0])
-        if name not in nameList:
-            now = datetime.now()
-            time = now.strftime('%I:%M:%S:%p')
-            date = now.strftime('%d-%B-%Y')
-            f.writelines(f'\n{name}, {time}, {date}')
-            f.close()
+def generate_frames():
+    path = 'Training_images'
 
-# take pictures from webcam
-cap  = cv2.VideoCapture(0)
-while True:
-    success, img = cap.read()
-    imgS = cv2.resize(img, (0,0), None, 0.25,0.25)
-    imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
-    faces_in_frame = face_recognition.face_locations(imgS)
-    encoded_faces = face_recognition.face_encodings(imgS, faces_in_frame)
-    for encode_face, faceloc in zip(encoded_faces,faces_in_frame):
-        matches = face_recognition.compare_faces(encoded_face_train, encode_face)
-        faceDist = face_recognition.face_distance(encoded_face_train, encode_face)
-        matchIndex = np.argmin(faceDist)
-        matches_id = 0
-        if np.any(faceDist<=0.5):
-            matches_id = matches[matchIndex]
-        if matches_id:
-            name = classNames[matchIndex].upper().lower()
-            y1,x2,y2,x1 = faceloc
-            # since we scaled down by 4 times
-            y1, x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
-            cv2.rectangle(img,(x1,y1),(x2,y2),(0,255,0),2)
-            cv2.rectangle(img, (x1,y2-35),(x2,y2), (0,255,0), cv2.FILLED)
-            cv2.putText(img,name, (x1+6,y2-5), cv2.FONT_HERSHEY_TRIPLEX  ,1,(255,255,255),2)
-            # cv2.putText(img,'abc', (x1+6,y2+15), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
-            markAttendance(name)
+    images = []
+    classNames = []
+    mylist = os.listdir(path)
+    for cl in mylist:
+        curImg = cv2.imread(f'{path}/{cl}')
+        images.append(curImg)
+        classNames.append(os.path.splitext(cl)[0])
+
+    def findEncodings(images):
+        encodeList = []
+        for img in images:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            encoded_face = face_recognition.face_encodings(img)[0]
+            encodeList.append(encoded_face)
+        return encodeList
+    encoded_face_train = findEncodings(images)
+
+    def markAttendance(name):
+        with open('Attendance.csv','r+') as f:
+            myDataList = f.readlines()
+            nameList = []
+            for line in myDataList:
+                entry = line.split(',')
+                nameList.append(entry[0])
+            if name not in nameList:
+                now = datetime.now()
+                time = now.strftime('%I:%M:%S:%p')
+                date = now.strftime('%d-%B-%Y')
+                f.writelines(f'\n{name}, {time}, {date}')
+                f.close()
+
+    # take pictures from webcam
+    cap  = cv2.VideoCapture(0)
+    while True:
+        success, img = cap.read()
+        imgS = cv2.resize(img, (0,0), None, 0.25,0.25)
+        imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+        faces_in_frame = face_recognition.face_locations(imgS)
+        encoded_faces = face_recognition.face_encodings(imgS, faces_in_frame)
+        for encode_face, faceloc in zip(encoded_faces,faces_in_frame):
+            matches = face_recognition.compare_faces(encoded_face_train, encode_face)
+            faceDist = face_recognition.face_distance(encoded_face_train, encode_face)
+            matchIndex = np.argmin(faceDist)
+            matches_id = 0
+            if np.any(faceDist<=0.5):
+                matches_id = matches[matchIndex]
+            if matches_id:
+                name = classNames[matchIndex].upper().lower()
+                y1,x2,y2,x1 = faceloc
+                # since we scaled down by 4 times
+                y1, x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
+                cv2.rectangle(img,(x1,y1),(x2,y2),(0,255,0),2)
+                cv2.rectangle(img, (x1,y2-35),(x2,y2), (0,255,0), cv2.FILLED)
+                cv2.putText(img,name, (x1+6,y2-5), cv2.FONT_HERSHEY_TRIPLEX  ,1,(255,255,255),2)
+                # cv2.putText(img,'abc', (x1+6,y2+15), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
+                broadcast_name(name.capitalize(),f'/static/img/{name.capitalize()}.jpg')
+                markAttendance(name)
+            else:
+                name = 'Unknown'
+                y1, x2, y2, x1 = faceloc
+                # since we scaled down by 4 times
+                y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2 )
+                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 0, 255), cv2.FILLED)
+                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX , 1, (255, 255, 255), 2)
+                # cv2.putText(img, 'abc', (x1 + 6, y2 + 15), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+                markAttendance(name)
+
+        # success, frame = cap.read()
+        if not success:
+            break
         else:
-            name = 'Unknown'
-            y1, x2, y2, x1 = faceloc
-            # since we scaled down by 4 times
-            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2 )
-            cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 0, 255), cv2.FILLED)
-            cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX , 1, (255, 255, 255), 2)
-            # cv2.putText(img, 'abc', (x1 + 6, y2 + 15), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-            markAttendance(name)
-    cv2.imshow('webcam', img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+            ret, buffer = cv2.imencode('.jpg', img)
+            frame = buffer.tobytes()
+            # socketio.emit('video_frame', {'frame': frame})
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            # socketio.emit('video_frame', {'frame': frame})
+    #
+    # cap.release()
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+if __name__ == '__main__':
+    socketio.run(app,allow_unsafe_werkzeug=True,host="0.0.0.0",port="5021")
+
+
+
+
+
+
+
+
+
+
+#
+
