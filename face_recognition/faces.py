@@ -8,9 +8,20 @@ import datetime
 from flask import Flask, render_template, Response
 import cv2
 from flask_socketio import SocketIO
+import psycopg2
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+
+conn = psycopg2.connect(
+    dbname="'face_attendance_30DEC23'",
+    user="odoo",
+    password="root",
+    host="localhost",
+    port="5432"
+)
+cursor = conn.cursor()
 
 @app.route('/')
 def index():
@@ -18,6 +29,11 @@ def index():
 
 def broadcast_name(name,image_url,rec_date,rec_time):
     socketio.emit('update_name', {'name': name,'image_url': image_url,'rec_date':rec_date,'rec_time':rec_time})
+
+def save_to_database(employee_id, check_in, check_out, worked_hours, overtime_hours):
+    query = "INSERT INTO hr_attendance (employee_id, check_in, check_out,worked_hours,overtime_hours) VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(query, (employee_id, check_in, check_out, worked_hours, overtime_hours))
+    conn.commit()
 
 def generate_frames():
     path = 'Training_images'
@@ -80,6 +96,7 @@ def generate_frames():
                 rec_date = datetime.date.today()
                 rec_time = datetime.datetime.now()
                 broadcast_name(name.capitalize(),f'/static/img/{name.capitalize()}.jpg',rec_date.strftime('%d-%m-%Y'),rec_time.strftime('%H:%M:%S'))
+                save_to_database(6,datetime.datetime.now(),None,1.0,1.0)
                 markAttendance(name)
             else:
                 name = 'Unknown'
@@ -98,12 +115,9 @@ def generate_frames():
         else:
             ret, buffer = cv2.imencode('.jpg', img)
             frame = buffer.tobytes()
-            # socketio.emit('video_frame', {'frame': frame})
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            # socketio.emit('video_frame', {'frame': frame})
     #
-    # cap.release()
 
 @socketio.on('connect')
 def handle_connect():
