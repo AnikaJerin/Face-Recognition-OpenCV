@@ -11,9 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script src="{{ url_for('static', filename='src/js/socket_file.js') }}"></script>
 </head>
-<body class="demo-wrap">
+<body>
     <img class="demo-bg" src="/static/background/background.jpg" alt="">
-    <div class="demo-content row" style="padding-top:2%;padding-left:2%">
+    <div class="row" style="padding-top:2%;padding-left:2%">
         <div class="col-7">
             <h3 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;"><b>FaceLog Attendance System</b></h3>
         </div>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="demo-content row" style="padding-top:2%;padding-left:2%">
+    <div class="row" style="padding-top:2%;padding-left:2%">
         <div class="col-7 box corner-box sample-heading" id="monitor_screen" style="position: relative;box-shadow: 0 4px 18px black;border-radius:6px;background-color:white;height:75vh;" align="center">
                 <img id="videoFeed" src="{{ url_for('video_feed')}}" alt="Webcam Feed"
                          style="height:100%;width:100%;display: block;">

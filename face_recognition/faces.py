@@ -99,7 +99,7 @@ def generate_frames():
                 rec_time = datetime.datetime.now()
                 broadcast_name(name.capitalize(), f'/static/img/{name.capitalize()}.jpg', rec_date.strftime('%d-%m-%Y'),
                                rec_time.strftime('%H:%M:%S'))
-                # markAttendance(name)
+                markAttendance(name)
             else:
                 name = 'Unknown'
                 y1, x2, y2, x1 = faceloc
