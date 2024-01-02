@@ -1,26 +1,75 @@
-#monitor_screen .scan
-{
-  width:96.6%;
-  height:5px;
-  background-color:green;
+.box::before {
+  content:"";
   position:absolute;
-  z-index:9999;
-   -moz-animation: scan 5s infinite;
-  -webkit-animation: scan 5s infinite;
-  animation: scan 5s infinite;
-   -webkit-animation-direction: alternate-reverse;
-  box-shadow:0px 0px 30px rgba(255,204,102,.5);
-
-
+  top:0;
+  bottom:0;
+  left:0;
+  width:2px;
+  background:#18c89b;
+  box-shadow:0 0 70px 20px #18c89b;
+  clip-path:inset(0);
+  animation:
+    x 0.5s ease-in-out infinite alternate,
+    y 1s   ease-in-out infinite;
 }
 
-@-webkit-keyframes scan {
-  0%, 100% {
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-  }
-  100% {
-    -webkit-transform: translateY(210px);
-    transform: translateY(70vh);
+@keyframes x {
+  to {
+    transform:translateX(-100%);
+    left:100%;
   }
 }
+
+@keyframes y {
+   33% {
+     clip-path:inset(0 0 0 -100px);    
+   }
+   50% {
+     clip-path:inset(0 0 0 0);    
+   }
+   83%{
+     clip-path:inset(0 -100px 0 0); 
+   }
+}
+
+
+/* corner borders */
+.corner-box {
+  --b: 10px;   /* thickness of the border */
+  --c: #228B22;   /* color of the border */
+  --w: 40px;  /* width of border */
+
+
+  border: var(--b) solid #0000; /* space for the border */
+  --_g: #0000 90deg,var(--c) 0;
+  --_p: var(--w) var(--w) border-box no-repeat;
+  background:
+    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+    conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+    conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p),
+    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+}
+
+/* blinking text */
+.blink_text {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+
+/* background image */
+
+.demo-bg {
+  opacity: 0.8;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: auto;
+}
+

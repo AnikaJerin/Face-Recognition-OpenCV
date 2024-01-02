@@ -9,10 +9,10 @@ from flask import Flask, render_template, Response
 import cv2
 from flask_socketio import SocketIO
 import psycopg2
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-
 
 conn = psycopg2.connect(
     dbname="'face_attendance_30DEC23'",
@@ -23,17 +23,32 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+
 @app.route('/')
 def index():
     return render_template('face_recognition.html')
 
-def broadcast_name(name,image_url,rec_date,rec_time):
-    socketio.emit('update_name', {'name': name,'image_url': image_url,'rec_date':rec_date,'rec_time':rec_time})
+
+def broadcast_name(name, image_url, rec_date, rec_time):
+    socketio.emit('update_name', {'name': name, 'image_url': image_url, 'rec_date': rec_date, 'rec_time': rec_time})
+
 
 def save_to_database(employee_id, check_in, check_out, worked_hours, overtime_hours):
     query = "INSERT INTO hr_attendance (employee_id, check_in, check_out,worked_hours,overtime_hours) VALUES (%s, %s, %s, %s, %s)"
     cursor.execute(query, (employee_id, check_in, check_out, worked_hours, overtime_hours))
     conn.commit()
+
+last_attendance_time = {}
+def markAttendance(name):
+    current_time = time.time()
+
+    if name in last_attendance_time.keys() and (current_time - last_attendance_time[name]) > 20:
+        last_attendance_time[name] = current_time
+        save_to_database(6, datetime.datetime.now(), None, 1.0, 1.0)
+    if name not in last_attendance_time.keys():
+        last_attendance_time[name] = current_time
+        save_to_database(6, datetime.datetime.now(), None, 1.0, 1.0)
+
 
 def generate_frames():
     path = 'Training_images'
@@ -53,61 +68,48 @@ def generate_frames():
             encoded_face = face_recognition.face_encodings(img)[0]
             encodeList.append(encoded_face)
         return encodeList
+
     encoded_face_train = findEncodings(images)
 
-    def markAttendance(name):
-        with open('Attendance.csv','r+') as f:
-            myDataList = f.readlines()
-            nameList = []
-            for line in myDataList:
-                entry = line.split(',')
-                nameList.append(entry[0])
-            if name not in nameList:
-                now = datetime.now()
-                time = now.strftime('%I:%M:%S:%p')
-                date = now.strftime('%d-%B-%Y')
-                f.writelines(f'\n{name}, {time}, {date}')
-                f.close()
-
     # take pictures from webcam
-    cap  = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
     while True:
         success, img = cap.read()
-        imgS = cv2.resize(img, (0,0), None, 0.25,0.25)
+        imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
         imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
         faces_in_frame = face_recognition.face_locations(imgS)
         encoded_faces = face_recognition.face_encodings(imgS, faces_in_frame)
-        for encode_face, faceloc in zip(encoded_faces,faces_in_frame):
+        for encode_face, faceloc in zip(encoded_faces, faces_in_frame):
             matches = face_recognition.compare_faces(encoded_face_train, encode_face)
             faceDist = face_recognition.face_distance(encoded_face_train, encode_face)
             matchIndex = np.argmin(faceDist)
             matches_id = 0
-            if np.any(faceDist<=0.5):
+            if np.any(faceDist <= 0.5):
                 matches_id = matches[matchIndex]
             if matches_id:
                 name = classNames[matchIndex].upper().lower()
-                y1,x2,y2,x1 = faceloc
+                y1, x2, y2, x1 = faceloc
                 # since we scaled down by 4 times
-                y1, x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
-                cv2.rectangle(img,(x1,y1),(x2,y2),(0,255,0),2)
-                cv2.rectangle(img, (x1,y2-35),(x2,y2), (0,255,0), cv2.FILLED)
-                cv2.putText(img,name, (x1+6,y2-5), cv2.FONT_HERSHEY_TRIPLEX  ,1,(255,255,255),2)
+                y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
+                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
                 # cv2.putText(img,'abc', (x1+6,y2+15), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
                 rec_date = datetime.date.today()
                 rec_time = datetime.datetime.now()
-                broadcast_name(name.capitalize(),f'/static/img/{name.capitalize()}.jpg',rec_date.strftime('%d-%m-%Y'),rec_time.strftime('%H:%M:%S'))
-                save_to_database(6,datetime.datetime.now(),None,1.0,1.0)
-                markAttendance(name)
+                broadcast_name(name.capitalize(), f'/static/img/{name.capitalize()}.jpg', rec_date.strftime('%d-%m-%Y'),
+                               rec_time.strftime('%H:%M:%S'))
+                # markAttendance(name)
             else:
                 name = 'Unknown'
                 y1, x2, y2, x1 = faceloc
                 # since we scaled down by 4 times
                 y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2 )
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 0, 255), cv2.FILLED)
-                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX , 1, (255, 255, 255), 2)
+                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
                 # cv2.putText(img, 'abc', (x1 + 6, y2 + 15), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                markAttendance(name)
+                # markAttendance(name)
 
         # success, frame = cap.read()
         if not success:
@@ -119,9 +121,11 @@ def generate_frames():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     #
 
+
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -132,17 +136,8 @@ def handle_disconnect():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 if __name__ == '__main__':
-    socketio.run(app,allow_unsafe_werkzeug=True,host="0.0.0.0",port="5021")
-
-
-
-
-
-
-
-
-
+    socketio.run(app, allow_unsafe_werkzeug=True, host="0.0.0.0", port="5024")
 
 #
-

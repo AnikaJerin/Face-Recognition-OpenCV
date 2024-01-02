@@ -11,40 +11,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script src="{{ url_for('static', filename='src/js/socket_file.js') }}"></script>
 </head>
-<body style="background-color:#002D62">
-<div class="row" style="padding-top:2%;padding-left:2%">
-    <div class="col-7" id="monitor_screen">
-        <h3 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;"><b>FaceLog Attendance System</b></h3>
-        <div style="box-shadow: 0 4px 18px black;border-radius:6px;background-color:white;height:80vh;" align="center">
-            <h5 class="pb-0 mb-0 pt-2" style='font-family: "Times New Roman", Times, serif;'>Hold still, till your face has been scanned..</h5>
-            <div class="scan"></div>
-            <img id="videoFeed" src="{{ url_for('video_feed')}}" alt="Webcam Feed"
-                     style="height:90%;width:100%;display: block;padding:4%;">
+<body class="demo-wrap">
+    <img class="demo-bg" src="/static/background/background.jpg" alt="">
+    <div class="demo-content row" style="padding-top:2%;padding-left:2%">
+        <div class="col-7">
+            <h3 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;"><b>FaceLog Attendance System</b></h3>
+        </div>
+        <div class="col-5" style="max-width:40%;" align="center">
+            <h4 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;">Login Details</h4>
         </div>
     </div>
-    <div class="col-5" style="max-width:40%;" align="center">
-        <h4 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;">Login Details</h4>
-        <img id="matched-image" style="border:2px solid black;width: 190px;height:190px; border-radius:50%;z-index:5;top: 30px;position: relative;" src="" alt="Person Image">
-        <div style="font-family: 'Times New Roman', Times, serif;background-color: #fff; padding: 20px;width:60%;height:65%; border-radius: 10px; box-shadow: 0 4px 18px black;z-index:2;position:relative;">
-            <br/>
-            <h3><b id="detectedName"></b></h3>
-            <div style="background-color:#A7C7E7;height:85%">
-                <p class="p-0 m-0">ID: 1543</p>
-                <p class="p-0 m-0">Occupation: Developer</p>
-                <p class="p-0 m-0">Rec Date: <span id="recDate"></span></p>
-                <p class="p-0 m-0">Rec Time: <span id="recTime"></span></p>
+
+    <div class="demo-content row" style="padding-top:2%;padding-left:2%">
+        <div class="col-7 box corner-box sample-heading" id="monitor_screen" style="position: relative;box-shadow: 0 4px 18px black;border-radius:6px;background-color:white;height:75vh;" align="center">
+                <img id="videoFeed" src="{{ url_for('video_feed')}}" alt="Webcam Feed"
+                         style="height:100%;width:100%;display: block;">
+            <p class="blink_text pl-3 ml-3" style="top: 0; width: 100%;text-align:left;position: absolute;font-size: 18px; color: green;z-index:40">
+                <span style="margin-right: 5px;font-size: 30px;">•</span><b>Recording</b></p>
+        </div>
+        <div class="col-5" style="max-width:40%;height:75vh;" align="center">
+            <img id="matched-image" style="border:2px solid black;width: 190px;height:197px; border-radius:50%;z-index:5;top: 30px;position: relative;" src="" alt="Person Image">
+            <div style="font-family: 'Times New Roman', Times, serif;background-color: #fff; padding: 20px;width:60%;height:65%; border-radius: 10px; box-shadow: 0 4px 18px black;z-index:2;position:relative;">
+                <br/>
+                <h3><b id="detectedName"></b></h3>
+                <div style="background-color:#A7C7E7;height:85%">
+                    <p class="p-0 m-0">ID: 1543</p>
+                    <p class="p-0 m-0">Occupation: Developer</p>
+                    <p class="p-0 m-0">Rec Date: <span id="recDate"></span></p>
+                    <p class="p-0 m-0">Rec Time: <span id="recTime"></span></p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<!--        <button id="startBtn">Start Webcam</button>-->
+    <!--        <button id="startBtn">Start Webcam</button>-->
 
-<!--    <script>-->
-<!--        document.getElementById('startBtn').addEventListener('click', () => {-->
-<!--            document.getElementById('videoContainer').style.display = 'block';-->
-<!--        });-->
-<!--    </script>-->
+    <!--    <script>-->
+    <!--        document.getElementById('startBtn').addEventListener('click', () => {-->
+    <!--            document.getElementById('videoContainer').style.display = 'block';-->
+    <!--        });-->
+    <!--    </script>-->
 </body>
 </html>
