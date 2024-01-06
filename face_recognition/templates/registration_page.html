@@ -1,0 +1,69 @@
+<!-- templates/registration.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/registration_page.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='src/js/registration_page.js') }}"></script>
+</head>
+<body class="pl-5 pr-5 pb-5 pt-1" style="background-color:#003153">
+    <h4 class="pt-1" style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;"><b>Get Registered</b></h4>
+    <div class="row m-0" style="box-shadow: 0 4px 18px black;position: relative; justify-content:center;width:100%;">
+        <div class="col-6" style="background-color:rgb(199,248,251,0.2);height:90vh;">
+            <div class="row p-3 pl-5" style="justify-content:center;width:100%;height:70%;position: relative;">
+                <i class="fa fa-plus-circle" style="z-index:15;position: absolute; top: 583px; left: 63px; font-size: 20px; color: green;"></i>
+                <i class="fa fa-minus-circle" style="z-index:15;position: absolute; top: 583px; left: 225px; font-size: 20px; color: red;"></i>
+                <img id="captureImg" src="{{ url_for('capture_img')}}" alt="Webcam Feed"
+                         style="height:100%;width:100%;display: block;">
+            </div>
+            <div class="row">
+                <div class="col-3 mx-5 pl-5">
+<!--                    <button class="button-26" role="button">Button 26</button>-->
+                </div>
+                <div class="col-3">
+                    <button onclick="captureImage()" class="button-26" role="button">Capture Image</button>
+                </div>
+            </div>
+            <br/>
+            <div class="row pb-5 mb-5" style="justify-content:center;">
+               <div class="col-3 mx-4" style="background-color:white;border:2px solid black;">
+                   <img id="avtImg0" src="{{ url_for('static', filename='img/avatar.png')}}" alt="Webcam Feed"
+                         style="height:100%;width:98%;display: block;">
+               </div>
+                <div class="col-3" style="background-color:white;border:2px solid black;">
+                   <img id="avtImg1" src="{{ url_for('static', filename='img/avatar.png')}}" alt="Webcam Feed"
+                         style="height:100%;width:98%;display: block;">
+               </div>
+                <div class="col-3 mx-4" style="background-color:white;border:2px solid black;">
+                   <img id="avtImg2" src="{{ url_for('static', filename='img/avatar.png')}}" alt="Webcam Feed"
+                         style="height:100%;width:98%;display: block;">
+               </div>
+<!--                <div class="col-3 border" style="height:40%;width:10%">-->
+<!--                   Image-->
+<!--               </div>-->
+           </div>
+        </div>
+        <div class="col-6" style="background-color:white">
+            <form action="/save_images" method="post">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="user_id">User ID:</label>
+                <input type="text" id="user_id" name="user_id" required>
+
+                <button type="button" onclick="captureImage()">Capture Image</button>
+                <button type="submit">Save Images</button>
+            </form>
+        </div>
+    </div>
+    <!-- Your registration form goes here -->
+
+</body>
+</html>

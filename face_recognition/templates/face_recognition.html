@@ -17,14 +17,18 @@
         <div class="col-7">
             <h3 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;"><b>FaceLog Attendance System</b></h3>
         </div>
-        <div class="col-5" style="max-width:40%;" align="center">
-            <h4 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;">Login Details</h4>
+        <div class="col-3" style="max-width:30%;" align="right">
+            <h4 style="color:white;text-align:right;font-family: 'Times New Roman', Times, serif;">Login Details</h4>
+        </div>
+        <div class="col-2 pr-5" align="right">
+            <a href="{{ url_for('registration') }}"><button class="button-34" role="button">Register Here</button></a>
+<!--            <h4 style="color:white;text-align:center;font-family: 'Times New Roman', Times, serif;">Login Details</h4>-->
         </div>
     </div>
 
     <div class="row" style="padding-top:2%;padding-left:2%">
         <div class="col-7 box corner-box sample-heading" id="monitor_screen" style="position: relative;box-shadow: 0 4px 18px black;border-radius:6px;background-color:white;height:75vh;" align="center">
-                <img id="videoFeed" src="{{ url_for('video_feed')}}" alt="Webcam Feed"
+            <img id="videoFeed" src="{{ url_for('video_feed')}}" alt="Webcam Feed"
                          style="height:100%;width:100%;display: block;">
             <p class="blink_text pl-3 ml-3" style="top: 0; width: 100%;text-align:left;position: absolute;font-size: 18px; color: green;z-index:40">
                 <span style="margin-right: 5px;font-size: 30px;">•</span><b>Recording</b></p>

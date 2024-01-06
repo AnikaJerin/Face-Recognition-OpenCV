@@ -5,7 +5,7 @@ import face_recognition
 import os
 import numpy as np
 import datetime
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response,request, redirect,url_for
 import cv2
 from flask_socketio import SocketIO
 import psycopg2
@@ -22,11 +22,71 @@ conn = psycopg2.connect(
     port="5432"
 )
 cursor = conn.cursor()
+img_cap = cv2.VideoCapture(0)
+last_frame = None
 
+captured_frames = []
+output_folder = 'training_folders/'
 
 @app.route('/')
 def index():
     return render_template('face_recognition.html')
+
+@app.route('/registration')
+def registration():
+    return render_template('registration_page.html')
+
+def capture_frame():
+    success, frame = img_cap.read()
+    if success:
+        ret, buffer = cv2.imencode('.jpg', frame)
+        return buffer.tobytes()
+    return None
+
+
+@app.route('/capture_frame')
+def get_frame():
+    global last_frame
+    last_frame = capture_frame()
+    captured_frames.append(last_frame)
+    return Response(last_frame, mimetype='image/jpeg')
+
+
+def generate_frames_for_image():
+    while True:
+        success, frame = img_cap.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+@app.route('/capture_img_feed')
+def capture_img():
+    return Response(generate_frames_for_image(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/save_images', methods=['POST'])
+def save_images():
+    name = request.form['name']
+    user_id = request.form['user_id']
+    folder_name = f"{name}_{user_id}"
+    folder_path = os.path.join(output_folder, folder_name)
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    for i, frame in enumerate(captured_frames):
+        file_path = os.path.join(folder_path, f"image_{i}.jpg")
+        with open(file_path, 'wb') as file:
+            file.write(frame)
+
+    # Clear the captured_frames list after saving
+    captured_frames.clear()
+
+    return redirect(url_for('registration'))
 
 
 def broadcast_name(name, image_url, rec_date, rec_time):
