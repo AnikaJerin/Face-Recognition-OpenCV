@@ -198,6 +198,6 @@ def video_feed():
 
 
 if __name__ == '__main__':
-    socketio.run(app, allow_unsafe_werkzeug=True, host="0.0.0.0", port="5024")
+    socketio.run(app, allow_unsafe_werkzeug=True, host="0.0.0.0", port="5025")
 
 #

@@ -25,7 +25,6 @@
             </div>
             <div class="row">
                 <div class="col-3 mx-5 pl-5">
-<!--                    <button class="button-26" role="button">Button 26</button>-->
                 </div>
                 <div class="col-3">
                     <button onclick="captureImage()" class="button-26" role="button">Capture Image</button>
@@ -51,16 +50,79 @@
            </div>
         </div>
         <div class="col-6" style="background-color:white">
-            <form action="/save_images" method="post">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+            <div class="tabbed">
+                <input type="radio" id="tab1" name="css-tabs" checked>
+                <input type="radio" id="tab2" name="css-tabs">
+                <ul class="tabs">
+                    <li class="tab"><label for="tab1">Authorized Users</label></li>
+                    <li class="tab"><label for="tab2">Guests</label></li>
+                </ul>
 
-                <label for="user_id">User ID:</label>
-                <input type="text" id="user_id" name="user_id" required>
+                <div class="tab-content">
+                    <form action="/save_images" method="post" style="font-family: 'Times New Roman', Times, serif;">
+                        <h5 class="pt-5 mt-5">Please fill in with personal details</h5>
+                        <br/>
+                        <br/>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="name">First Name:</label>
+                                <input type="text" id="name" name="name" placeholder="Enter First Name" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="last_name">Last Name:</label>
+                                <input type="text" id="last_name" name="last_name" placeholder="Enter Last Name" required>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="user_id">User ID:</label>
+                                <input type="text" id="user_id" name="user_id" placeholder="Enter ID/PIN" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="designation">Designation:</label>
+                                <input type="text" id="designation" name="designation" placeholder="Enter Designation">
+                            </div>
+                        </div>
 
-<!--                <button type="button" onclick="captureImage()">Capture Image</button>-->
-                <button type="submit">Save Images</button>
-            </form>
+                        <button type="submit" class="btn btn-info">Register</button>
+                    </form>
+                </div>
+
+                <div class="tab-content">
+                    <form action="/save_images" method="post" style="font-family: 'Times New Roman', Times, serif;">
+                        <h5 class="pt-5 mt-5">Please fill in with personal details</h5>
+                        <br/>
+                        <br/>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="guest_name">First Name:</label>
+                                <input type="text" id="guest_name" name="guest_name" placeholder="Enter First Name" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="guest_last_name">Last Name:</label>
+                                <input type="text" id="guest_last_name" name="guest_last_name" placeholder="Enter Last Name" required>
+                            </div>
+                        </div>
+                        <br/>
+<!--                        <div class="row">-->
+<!--                            <div class="col-6">-->
+<!--                                <label for="user_id">User ID:</label>-->
+<!--                                <input type="text" id="user_id" name="user_id" placeholder="Enter ID/PIN" required>-->
+<!--                            </div>-->
+<!--                            <div class="col-6">-->
+<!--                                <label for="designation">Designation:</label>-->
+<!--                                <input type="text" id="designation" name="designation" placeholder="Enter Designation">-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+                        <button type="submit" class="btn btn-info">Register</button>
+                    </form>
+                </div>
+
+                </div>
+            </div>
+
         </div>
     </div>
 
