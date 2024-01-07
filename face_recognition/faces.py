@@ -111,15 +111,21 @@ def markAttendance(name):
 
 
 def generate_frames():
-    path = 'Training_images'
-
+    root_path = 'training_folders'
     images = []
     classNames = []
-    mylist = os.listdir(path)
-    for cl in mylist:
-        curImg = cv2.imread(f'{path}/{cl}')
-        images.append(curImg)
-        classNames.append(os.path.splitext(cl)[0])
+
+    for person_folder in os.listdir(root_path):
+        person_path = os.path.join(root_path, person_folder)
+        if os.path.isdir(person_path):
+            name, ID = person_folder.split('_')
+
+            # subFolder
+            for image_file in os.listdir(person_path):
+                image_path = os.path.join(person_path, image_file)
+                curImg = cv2.imread(image_path)
+                images.append(curImg)
+                classNames.append((name, ID))
 
     def findEncodings(images):
         encodeList = []
@@ -147,13 +153,14 @@ def generate_frames():
             if np.any(faceDist <= 0.5):
                 matches_id = matches[matchIndex]
             if matches_id:
-                name = classNames[matchIndex].upper().lower()
+                name, ID = classNames[matchIndex]
+                # name = name.upper().lower()
                 y1, x2, y2, x1 = faceloc
                 # since we scaled down by 4 times
                 y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
-                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
+                cv2.putText(img, f'{name} - {ID}', (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
                 # cv2.putText(img,'abc', (x1+6,y2+15), cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),2)
                 rec_date = datetime.date.today()
                 rec_time = datetime.datetime.now()
@@ -167,7 +174,7 @@ def generate_frames():
                 y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 0, 255), cv2.FILLED)
-                cv2.putText(img, name, (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
+                cv2.putText(img, f'{name} - {ID}', (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
                 # cv2.putText(img, 'abc', (x1 + 6, y2 + 15), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
                 # markAttendance(name)
 
