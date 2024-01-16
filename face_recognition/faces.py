@@ -89,6 +89,28 @@ def save_images():
 
     return redirect(url_for('registration'))
 
+
+@app.route('/save_images2', methods=['POST'])
+def save_images_two():
+    name = request.form['guest_name']
+    user_id = 'Unknown'
+    designation = 'Guest'
+    folder_name = f"{name}_{user_id}_{designation}"
+    folder_path = os.path.join(output_folder, folder_name)
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    for i, frame in enumerate(captured_frames):
+        file_path = os.path.join(folder_path, f"image_{i}.jpg")
+        with open(file_path, 'wb') as file:
+            file.write(frame)
+
+    # Clear the captured_frames list after saving
+    captured_frames.clear()
+
+    return redirect(url_for('registration'))
+
 # Take Attendance
 
 def broadcast_name(name, image_url, rec_date, rec_time,person_id,designation):
@@ -128,7 +150,7 @@ def generate_frames():
                 image_path = os.path.join(person_path, image_file)
                 curImg = cv2.imread(image_path)
                 images.append(curImg)
-                classNames.append((name, ID))
+                classNames.append((name, ID, designation))
 
     def findEncodings(images):
         encodeList = []
@@ -156,7 +178,7 @@ def generate_frames():
             if np.any(faceDist <= 0.5):
                 matches_id = matches[matchIndex]
             if matches_id:
-                name, ID = classNames[matchIndex]
+                name, ID, designation = classNames[matchIndex]
                 # name = name.upper().lower()
                 y1, x2, y2, x1 = faceloc
                 # since we scaled down by 4 times
