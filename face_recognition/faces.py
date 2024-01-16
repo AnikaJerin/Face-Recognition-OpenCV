@@ -72,7 +72,8 @@ def capture_img():
 def save_images():
     name = request.form['name']
     user_id = request.form['user_id']
-    folder_name = f"{name}_{user_id}"
+    designation = request.form['designation']
+    folder_name = f"{name}_{user_id}_{designation}"
     folder_path = os.path.join(output_folder, folder_name)
 
     if not os.path.exists(folder_path):
@@ -88,9 +89,11 @@ def save_images():
 
     return redirect(url_for('registration'))
 
+# Take Attendance
 
-def broadcast_name(name, image_url, rec_date, rec_time):
-    socketio.emit('update_name', {'name': name, 'image_url': image_url, 'rec_date': rec_date, 'rec_time': rec_time})
+def broadcast_name(name, image_url, rec_date, rec_time,person_id,designation):
+    socketio.emit('update_name', {'name': name, 'image_url': image_url, 'rec_date': rec_date, 'rec_time': rec_time,
+                                  'person_id':person_id,'designation':designation})
 
 
 def save_to_database(employee_id, check_in, check_out, worked_hours, overtime_hours):
@@ -118,7 +121,7 @@ def generate_frames():
     for person_folder in os.listdir(root_path):
         person_path = os.path.join(root_path, person_folder)
         if os.path.isdir(person_path):
-            name, ID = person_folder.split('_')
+            name, ID, designation = person_folder.split('_')
 
             # subFolder
             for image_file in os.listdir(person_path):
@@ -165,18 +168,21 @@ def generate_frames():
                 rec_date = datetime.date.today()
                 rec_time = datetime.datetime.now()
                 broadcast_name(name.capitalize(), f'/static/img/{name.capitalize()}.jpg', rec_date.strftime('%d-%m-%Y'),
-                               rec_time.strftime('%H:%M:%S'))
+                               rec_time.strftime('%H:%M:%S'),str(ID),designation)
                 markAttendance(name)
             else:
                 name = 'Unknown'
+                person_id = 'Unknown'
                 y1, x2, y2, x1 = faceloc
                 # since we scaled down by 4 times
                 y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 0, 255), cv2.FILLED)
-                cv2.putText(img, f'{name} - {ID}', (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
-                # cv2.putText(img, 'abc', (x1 + 6, y2 + 15), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                # markAttendance(name)
+                cv2.putText(img, f'{name} - {person_id}', (x1 + 6, y2 - 5), cv2.FONT_HERSHEY_TRIPLEX, 1, (255, 255, 255), 2)
+                rec_date = datetime.date.today()
+                rec_time = datetime.datetime.now()
+                broadcast_name('Unknown', f'/static/img/avatar.png', rec_date.strftime('%d-%m-%Y'),
+                               rec_time.strftime('%H:%M:%S'),'Unknown','Unknown')
 
         # success, frame = cap.read()
         if not success:
